@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>🎄 Catch the Gifts 🎁</title>
+<link rel="stylesheet" href="CSS/game.css">
+
+</head>
+
+<body>
+
+<h1>🎄 Catch the Gifts 🎁</h1>
+<p>คะแนน: <span id="score">0</span> | ❤️ ชีวิต: <span id="life">3</span></p>
+
+<div class="game-container">
+    <canvas id="game" width="400" height="500"></canvas>
+
+    <div class="overlay">
+        <button id="startBtn">▶ เริ่มเกม</button>
+        <button id="restartBtn">🔁 เล่นใหม่</button>
+    </div>
+</div>
+
+<script src="js/game.js"></script>
+
+<audio id="soundCatch" src="https://assets.mixkit.co/sfx/preview/mixkit-video-game-win-2016.mp3"></audio>
+<audio id="soundMiss" src="https://assets.mixkit.co/sfx/preview/mixkit-player-losing-or-failing-2042.mp3"></audio>
+<audio id="soundSpecial" src="https://assets.mixkit.co/sfx/preview/mixkit-magical-coin-win-1936.mp3"></audio>
+
+
+</body>
+</html>
