@@ -34,15 +34,8 @@ let gameStarted = false;
 let gameOver = false;
 let baseSpeed = 3;
 
-// ▶ เริ่มเกม
+// เริ่มเกม
 function startGame() {
-
-    // 🔊 ปลดล็อกเสียง
-    [soundCatch, soundMiss, soundSpecial].forEach(s => {
-        s.currentTime = 0;
-        s.play().then(() => s.pause());
-    });
-
     gifts = [];
     score = 0;
     life = 3;
@@ -63,18 +56,19 @@ function restartGame() {
     startGame();
 }
 
-// 🖱 ควบคุมตะกร้า
+// ควบคุมตะกร้า
 canvas.addEventListener('mousemove', e => {
     if (!gameStarted) return;
     const rect = canvas.getBoundingClientRect();
     basketX = e.clientX - rect.left - basketWidth / 2;
 });
 
-// 🎁 สร้างของขวัญ
+// สร้างของขวัญ
 function createGift() {
     if (!gameStarted || gameOver) return;
 
     const gift = giftTypes[Math.floor(Math.random() * giftTypes.length)];
+
     gifts.push({
         x: Math.random() * 360,
         y: 0,
@@ -84,7 +78,7 @@ function createGift() {
     });
 }
 
-// 💀 GAME OVER
+// GAME OVER
 function showGameOver() {
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
     ctx.fillRect(0, 0, 400, 500);
@@ -92,13 +86,14 @@ function showGameOver() {
     ctx.fillStyle = 'white';
     ctx.font = '30px Arial';
     ctx.fillText('GAME OVER', 95, 220);
+
     ctx.font = '18px Arial';
     ctx.fillText('คะแนน: ' + score, 145, 260);
 
     restartBtn.style.display = 'inline-block';
 }
 
-// 🎮 วาดเกม
+// วาดเกม
 function update() {
     if (!gameStarted) return;
 
@@ -110,18 +105,16 @@ function update() {
 
     gifts = gifts.filter(g => {
         g.y += baseSpeed;
+
         ctx.font = '28px Arial';
         ctx.fillText(g.emoji, g.x, g.y);
 
-        // ✅ รับ
+        // ✅ รับของขวัญ
         if (g.y > basketY - 10 && g.x > basketX && g.x < basketX + basketWidth) {
             score += g.score;
             scoreEl.textContent = score;
 
-            const sound = g.special ? soundSpecial : soundCatch;
-            sound.currentTime = 0;
-            sound.play();
-
+            (g.special ? soundSpecial : soundCatch).play();
             return false;
         }
 
@@ -129,8 +122,6 @@ function update() {
         if (g.y > 520) {
             life--;
             lifeEl.textContent = life;
-
-            soundMiss.currentTime = 0;
             soundMiss.play();
 
             if (life <= 0) gameOver = true;
@@ -148,7 +139,6 @@ function update() {
     requestAnimationFrame(update);
 }
 
-// ✅ event listeners ต้องอยู่นอก update
 startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', restartGame);
 setInterval(createGift, 900);
