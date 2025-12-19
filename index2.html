@@ -1,32 +1,230 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<title>🎄 Catch the Gifts 🎁</title>
-<link rel="stylesheet" href="CSS/game.css">
+<!DOCTYPE html> <html lang="th"> <head> <meta charset="UTF-8"> <title>🎄 Catch the Gifts 🎁</title> 
+    <style> 
+        body { margin: 0; font-family: Arial, sans-serif;
+         background: linear-gradient(#1effda, #65b1ee,  #65eec0); 
+         color: white; text-align: center; }
+          .game-container { position: relative; width: 500px; margin: 20px auto; } 
+          canvas { background: white; border-radius: 14px; position: relative;  z-index: 1;}
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;          /* 👈 ซ่อนก่อน */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    z-index: 10;
+    background: rgba(0,0,0,0.2);
+    backdrop-filter: blur(4px);
+    pointer-events: auto;
+    
+ } 
 
+button { padding: 12px 28px; font-size: 20px; 
+         border-radius: 14px; border: none; cursor: pointer;
+         background: red; color: white; } 
+#restartBtn { display: none; } 
+#gameOverText,
+#finalScore {
+    display: none;
+}
+#gameOverText {
+    font-size: 42px;
+    color: #ff3b3b;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+}
+#finalScore {
+    font-size: 20px;
+    margin-top: 0.1px;
+    margin-bottom: 40px;   /* 👈 เพิ่มช่องว่างอีก */
+    text-align: center;
+}
+
+
+          </style> 
 </head>
+ <body>
+     <h1>🎄 Catch the Gifts 🎁</h1> 
+     <p>คะแนน: 
+        <span id="score">0</span> | ❤️ ชีวิต: 
+        <span id="life">3</span>
+    </p> 
+    <div class="game-container">
+         <canvas id="game" width="450" height="550"></canvas>
+          <div class="overlay" >
+            <h2 id="gameOverText">Game Over</h2>
+               <p id="finalScore"></p>
+             <button id="startBtn">▶ เริ่มเกม</button>
+    <div>
+    <button id="restartBtn">🔁 เล่นใหม่</button> </div> 
 
-<body>
-
-<h1>🎄 Catch the Gifts 🎁</h1>
-<p>คะแนน: <span id="score">0</span> | ❤️ ชีวิต: <span id="life">3</span></p>
-
-<div class="game-container">
-    <canvas id="game" width="400" height="500"></canvas>
-
-    <div class="overlay">
-        <button id="startBtn">▶ เริ่มเกม</button>
-        <button id="restartBtn">🔁 เล่นใหม่</button>
-    </div>
-</div>
-
-<script src="js/game.js"></script>
-
-<audio id="soundCatch" src="https://assets.mixkit.co/sfx/preview/mixkit-video-game-win-2016.mp3"></audio>
-<audio id="soundMiss" src="https://assets.mixkit.co/sfx/preview/mixkit-player-losing-or-failing-2042.mp3"></audio>
-<audio id="soundSpecial" src="https://assets.mixkit.co/sfx/preview/mixkit-magical-coin-win-1936.mp3"></audio>
+</div> 
+<audio id="soundCatch" src="audio/falling-259680.mp3"></audio> 
+<audio id="soundMiss" src="audio/fast-body-fall-impact-352725.mp3"></audio>
+<audio id="soundSpecial" src="audio/falling-259680.mp3"></audio>
 
 
-</body>
-</html>
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const startBtn = document.getElementById('startBtn');
+const restartBtn = document.getElementById('restartBtn');
+
+const soundCatch = document.getElementById('soundCatch');
+const soundMiss = document.getElementById('soundMiss');
+const soundSpecial = document.getElementById('soundSpecial');
+
+const scoreEl = document.getElementById('score');
+const lifeEl = document.getElementById('life');
+
+// 🎁 ประเภทของขวัญ
+const giftTypes = [
+    { emoji: '🎁', score: 1, special: false },
+    { emoji: '🧦', score: 1, special: false },
+    { emoji: '🍪', score: 1, special: false },
+    { emoji: '🎄', score: 2, special: false },
+    { emoji: '🎅🏻', score: 5, special: true },
+    { emoji: '⛄', score: 3, special: true }
+];
+
+// ตะกร้า
+let basketX = 160;
+const basketWidth = 80;
+const basketHeight = 20;
+const basketY = canvas.height - 50;
+
+// เกม
+let gifts = [];
+let score = 0;
+let life = 3;
+let gameStarted = false;
+let gameOver = false;
+let baseSpeed = 3;
+
+// เริ่มเกม
+function startGame() {
+    gifts = [];
+    score = 0;
+    life = 3;
+    gameStarted = true;
+    gameOver = false;
+    basketX = 160;
+
+    scoreEl.textContent = score;
+    lifeEl.textContent = life;
+
+    startBtn.style.display = 'none';
+    restartBtn.style.display = 'none';
+
+    document.querySelector('.overlay').style.display = 'none';
+    document.getElementById('gameOverText').style.display = 'none';
+    document.getElementById('finalScore').style.display = 'none';
+
+
+
+    update();
+}
+
+
+
+// ควบคุมตะกร้า
+canvas.addEventListener('mousemove', e => {
+    if (!gameStarted) return;
+    const rect = canvas.getBoundingClientRect();
+    basketX = e.clientX - rect.left - basketWidth / 2;
+});
+
+// สร้างของขวัญ
+function createGift() {
+    if (!gameStarted || gameOver) return;
+
+    const gift = giftTypes[Math.floor(Math.random() * giftTypes.length)];
+
+    gifts.push({
+        x: Math.random() * (canvas.width - 30),
+        y: 0,
+        emoji: gift.emoji,
+        score: gift.score,
+        special: gift.special
+    });
+}
+
+// GAME OVER
+function showGameOver() {
+   gameStarted = false;
+    gameOver = true;
+
+    const overlay = document.querySelector('.overlay');
+
+    overlay.style.display = 'flex';        // 👈 เปิด overlay
+    document.getElementById('gameOverText').style.display = 'block';
+    document.getElementById('finalScore').style.display = 'block';
+    document.getElementById('finalScore').textContent = 'คะแนน: ' + score;
+
+    restartBtn.style.display = 'inline-block';
+}
+
+
+// วาดเกม
+function update() {
+    if (!gameStarted) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // ตะกร้า
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(basketX, basketY, basketWidth, basketHeight);
+
+    gifts = gifts.filter(g => {
+        g.y += baseSpeed;
+
+        ctx.font = '28px Arial';
+        ctx.fillText(g.emoji, g.x, g.y);
+
+        // ✅ รับของขวัญ
+       if (g.y > basketY - 10 && g.x > basketX && g.x < basketX + basketWidth) {
+    score += g.score;
+    scoreEl.textContent = score;
+
+    if (g.special) {
+        soundSpecial.currentTime = 0;
+        soundSpecial.play();
+    } else {
+        soundCatch.currentTime = 0;
+        soundCatch.play();
+    }
+
+    return false;
+}
+        // ❌ พลาด
+       if (g.y > canvas.height) {
+            life--;
+            lifeEl.textContent = life;
+            soundMiss.play();
+
+            if (life <= 0) gameOver = true;
+            return false;
+        }
+
+        return true;
+    });
+
+    if (gameOver) {
+        showGameOver();
+        return;
+    }
+
+    requestAnimationFrame(update);
+}
+
+startBtn.addEventListener('click', startGame);
+function restartGame() {
+    startGame();
+   
+}
+
+ restartBtn.addEventListener('click', restartGame);
+
+setInterval(createGift, 900);
+</script>
+</body> </html>
