@@ -39,15 +39,23 @@ button { padding: 12px 28px; font-size: 20px;
     margin-bottom: 40px;   /* 👈 เพิ่มช่องว่างอีก */
     text-align: center;
 }
+#soundToggle {
+    margin: 10px auto;
+    background: #0a73e3;
+    border-radius: 20px;
+    font-size: 16px;
+    padding: 8px 18px;
+}
 
-
-          </style> 
+</style> 
 </head>
  <body>
      <h1>🎄 Catch the Gifts 🎁</h1> 
      <p>คะแนน: 
         <span id="score">0</span> | ❤️ ชีวิต: 
-        <span id="life">3</span>
+        <span id="life">3</span>  
+       <br>
+        <button id="soundToggle">🔊 เสียง: เปิด</button>
     </p> 
     <div class="game-container">
          <canvas id="game" width="450" height="550"></canvas>
@@ -57,11 +65,13 @@ button { padding: 12px 28px; font-size: 20px;
              <button id="startBtn">▶ เริ่มเกม</button>
     <div>
     <button id="restartBtn">🔁 เล่นใหม่</button> </div> 
+   
 
 </div> 
 <audio id="soundCatch" src="audio/falling-259680.mp3"></audio> 
 <audio id="soundMiss" src="audio/fast-body-fall-impact-352725.mp3"></audio>
 <audio id="soundSpecial" src="audio/falling-259680.mp3"></audio>
+<audio id="soundBackground" src="audio/christmas-jazz-christmas-holiday-347485.mp3"></audio>
 
 
 <script>
@@ -76,6 +86,39 @@ const soundSpecial = document.getElementById('soundSpecial');
 
 const scoreEl = document.getElementById('score');
 const lifeEl = document.getElementById('life');
+const soundBackground = document.getElementById('soundBackground');
+soundBackground.loop = true;
+soundBackground.volume = 0.4; // ปรับเบา-ดังได้
+
+let soundOn = true;
+
+const soundToggle = document.getElementById('soundToggle');
+
+soundToggle.addEventListener('click', () => {
+    soundOn = !soundOn;
+
+    if (soundOn) {
+        soundBackground.play();
+        soundToggle.textContent = '🔊 เสียง: เปิด';
+    } else {
+        soundBackground.pause();
+        soundToggle.textContent = '🔇 เสียง: ปิด';
+    }
+});
+function fadeInSound(audio, targetVolume = 0.4, duration = 2000) {
+    audio.volume = 0;
+    audio.play();
+
+    const step = targetVolume / (duration / 50);
+
+    const fade = setInterval(() => {
+        if (audio.volume < targetVolume) {
+            audio.volume = Math.min(audio.volume + step, targetVolume);
+        } else {
+            clearInterval(fade);
+        }
+    }, 50);
+}
 
 // 🎁 ประเภทของขวัญ
 const giftTypes = [
@@ -120,7 +163,8 @@ function startGame() {
     document.getElementById('gameOverText').style.display = 'none';
     document.getElementById('finalScore').style.display = 'none';
 
-
+    soundBackground.currentTime = 0;
+    soundBackground.play();
 
     update();
 }

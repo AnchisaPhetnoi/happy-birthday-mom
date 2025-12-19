@@ -21,8 +21,8 @@ box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
 .Famil-photo img {
-width: 240px; height: 240px; object-fit: cover;
-border-radius: 50%; border: 8px solid #8e55f9;
+width: 580px; height: 320px; object-fit: cover;
+border-radius: 20px; border: 8px solid #8e55f9;
 box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 .Da-photo img {
@@ -93,6 +93,38 @@ color: #080205;
 font-weight: bold;
 }
 
+/* เมนูปุ่ม */
+.menu {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.menu-btn {
+    text-decoration: none;
+    padding: 12px 26px;
+    font-size: 18px;
+    border-radius: 16px;
+    font-weight: bold;
+
+    background: linear-gradient(135deg, #793bff, #f225fd);
+    color: white;
+
+    box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+    transition: all 0.25s ease;
+}
+
+.menu-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    background: linear-gradient(135deg, #7e5eff, #fbb3ff);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.35);
+}
+
+.menu-btn:active {
+    transform: scale(0.96);
+}
 
 footer {
 margin-top: 40px;
